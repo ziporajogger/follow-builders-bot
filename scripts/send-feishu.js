@@ -73,40 +73,22 @@ function buildContent(md) {
 }
 
 // markdown → 飞书 post 富文本（标题、列表、链接、加粗）
-// 每个 builder 之间加一行明显分隔线，标题单独成行，避免内容全挤在一起
-const SEP = '━━━━━━━━━━━━';
-
 function markdownToPost(md) {
   const content = [];
-  let lastWasSep = false;
-  const pushSep = () => {
-    if (content.length && !lastWasSep) {
-      content.push([{ tag: 'text', text: SEP }]);
-      lastWasSep = true;
-    }
-  };
-
   for (const raw of md.split('\n')) {
     const line = raw.trim();
     if (!line) continue;
-
-    if (/^-{3,}$/.test(line) || /^\*{3,}$/.test(line)) {
-      pushSep();
-      continue;
-    }
+    if (/^-{3,}$/.test(line) || /^\*{3,}$/.test(line)) continue; // 分隔线，跳过
 
     if (/^#{1,6}\s/.test(line)) {
       const text = line.replace(/^#{1,6}\s+/, '');
-      pushSep();
       content.push([{ tag: 'text', text: '【' + text + '】' }]);
-      lastWasSep = false;
       continue;
     }
 
     const isBullet = /^[-*]\s/.test(line);
     const text = (isBullet ? '• ' : '') + line.replace(/^[-*]\s+/, '');
     content.push(inlineToPost(text));
-    lastWasSep = false;
   }
   return content;
 }

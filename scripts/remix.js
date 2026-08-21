@@ -76,7 +76,7 @@ async function main() {
 
 const ZH_INSTRUCTIONS = `# 中文输出规范（必须遵守）
 
-- 最终输出必须是纯简体中文：小节标题（"X / TWITTER" 写成 "推特"、"OFFICIAL BLOGS" 写成 "官方博客"、"PODCASTS" 写成 "播客"）、每条推文摘要、播客摘要全部翻译成中文。
+- 正文必须是纯简体中文（每条推文摘要、播客摘要都翻译成中文）；小节标题保留英文原样（"X / TWITTER"、"OFFICIAL BLOGS"、"PODCASTS" 不翻译）。
 - 禁止出现英文段落，禁止中英双语混排（不要"一段英文、下面跟一段中文"）。
 - 技术术语保留英文：AI、LLM、agent、evals、API、fine-tuning、RAG、prompt、ARR、SaaS 等。
 - 人名、公司名、产品名、工具名保留英文原文，不音译、不翻译。
@@ -86,8 +86,8 @@ const ZH_INSTRUCTIONS = `# 中文输出规范（必须遵守）
 # 抓重点 + 清晰分隔（必须遵守）
 
 - 只写最有价值的内容：原创观点、产品发布、技术洞察、行业判断、金句。每个 builder 用 2-4 句中文概括。
+- 每个 builder 的摘要写成连贯的一段中文，不要用 bullet 分点，不要拆成"原推文 / 原推文（补充）"这种重复的两条，不要先贴英文原文再补中文。
 - 跳过：日常闲聊、无评论的转发、纯推广、"活动很棒"这类、空洞的预告。没有实质内容的 builder 直接省略，不要硬凑字数。
-- 每个 builder 之间用单独一行 "---" 分隔，让内容视觉上明显分开，不要挤在一起。
 - 每个 builder 的标题用 "### 全名 + 头衔"（头衔从 bio 提取，例如 "Box CEO Aaron Levie"），标题下直接写中文摘要，最后放该条内容的原文链接。
 
 # 播客部分专项要求（必须遵守）
@@ -100,7 +100,11 @@ const ZH_INSTRUCTIONS = `# 中文输出规范（必须遵守）
 
 function buildSystem(p, lang) {
   const parts = [];
-  if (p.digest_intro) parts.push(p.digest_intro);
+  if (p.digest_intro) {
+    parts.push(
+      p.digest_intro.replace(/- At the very end, add a line:[^\n]*\n?/g, '')
+    );
+  }
   if (p.summarize_tweets) parts.push(p.summarize_tweets);
   if (p.summarize_podcast) parts.push(p.summarize_podcast);
   if (p.summarize_blogs) parts.push(p.summarize_blogs);
