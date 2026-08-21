@@ -1,17 +1,19 @@
 #!/usr/bin/env node
-// Follow Builders — 润色（调 Claude API）
-// 从 stdin 读 prepare-digest.js 输出的 JSON，交给 Claude 模型润色成摘要，
+// Follow Builders — 润色（调 DeepSeek 大模型 API）
+// 从 stdin 读 prepare-digest.js 输出的 JSON，交给大模型润色成摘要，
 // 把 markdown 写到 stdout。
 //
 // 环境变量：
-//   ANTHROPIC_API_KEY  （必填）
+//   DEEPSEEK_API_KEY   （必填）
+//   DEEPSEEK_MODEL     （默认 deepseek-chat；要推理可改 deepseek-reasoner）
+//   DEEPSEEK_BASE_URL  （默认 https://api.deepseek.com）
 //   DIGEST_LANGUAGE     zh / en / bilingual（默认 zh）
-//   ANTHROPIC_MODEL     （默认 claude-sonnet-5）
 
 import { readFileSync } from 'fs';
 
-const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5';
+const MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
 const LANGUAGE = process.env.DIGEST_LANGUAGE || 'zh';
+const BASE_URL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com';
 
 const NO_CONTENT = {
   zh: '今天没有新的动态，明天再来看看。',
@@ -42,32 +44,30 @@ async function main() {
   const system = buildSystem(data.prompts || {}, LANGUAGE);
   const userMsg = buildUser(data);
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch(`${BASE_URL}/chat/completions`, {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
+      authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
     },
     body: JSON.stringify({
       model: MODEL,
       max_tokens: 8000,
-      system,
-      messages: [{ role: 'user', content: userMsg }],
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: userMsg },
+      ],
     }),
   });
 
   if (!res.ok) {
     const err = await res.text();
-    console.error('Claude API 错误', res.status, err.slice(0, 2000));
+    console.error('DeepSeek API 错误', res.status, err.slice(0, 2000));
     process.exit(1);
   }
 
   const out = await res.json();
-  const text = (out.content || [])
-    .filter((b) => b.type === 'text')
-    .map((b) => b.text)
-    .join('');
+  const text = out.choices?.[0]?.message?.content || '';
   process.stdout.write(text);
 }
 
