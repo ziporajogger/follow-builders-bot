@@ -67,7 +67,7 @@ async function send(token, content) {
 
 function extractTitle(md) {
   for (const raw of md.split('\n')) {
-    const m = raw.trim().match(/^#{1,6}\s+(AI Builders Digest.*)$/);
+    const m = raw.trim().match(/^(?:#{1,6}\s+)?(AI Builders Digest.*)$/);
     if (m) return m[1].trim();
   }
   return 'AI Builders Digest';
@@ -87,7 +87,7 @@ function markdownToPost(md) {
     const line = raw.trim();
     if (!line) continue;
     if (/^-{3,}$/.test(line) || /^\*{3,}$/.test(line)) continue; // 分隔线，跳过
-    if (/^#{1,6}\s+AI Builders Digest\b/.test(line)) continue; // 顶部大标题，已在 post title 里，跳过
+    if (/^(?:#{1,6}\s+)?AI Builders Digest\b/.test(line)) continue; // 顶部大标题，已在 post title 里，跳过
 
     if (/^#{1,6}\s/.test(line)) {
       const text = line.replace(/^#{1,6}\s+/, '');

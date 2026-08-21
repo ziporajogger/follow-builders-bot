@@ -76,6 +76,7 @@ async function main() {
 
 const ZH_INSTRUCTIONS = `# 中文输出规范（必须遵守）
 
+- 直接输出 digest 正文，第一行就是标题。不要有任何开场白、确认语、解释或前言（例如"好的，这是根据您提供的JSON数据生成的..."这类话一律不要），也不要结尾总结。
 - 正文必须是纯简体中文（每条推文摘要、播客摘要都翻译成中文）；小节标题保留英文原样（"X / TWITTER"、"OFFICIAL BLOGS"、"PODCASTS" 不翻译）。
 - 禁止出现英文段落，禁止中英双语混排（不要"一段英文、下面跟一段中文"）。
 - 技术术语保留英文：AI、LLM、agent、evals、API、fine-tuning、RAG、prompt、ARR、SaaS 等。
