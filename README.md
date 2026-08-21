@@ -1,4 +1,4 @@
-# Follow Builders — 每日 AI 摘要推送到飞书
+# Follow Builders Bot — 每日 AI 摘要推送到飞书
 
 每天定时拉取 [follow-builders](https://github.com/zarazhangrui/follow-builders) 的 feed，
 用大模型润色成中文摘要，私发到你的飞书。
