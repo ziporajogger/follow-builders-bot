@@ -74,6 +74,22 @@ async function main() {
   process.stdout.write(text);
 }
 
+const ZH_INSTRUCTIONS = `# 中文输出规范（必须遵守）
+
+- 最终输出必须是纯简体中文：小节标题（"X / TWITTER" 写成 "推特"、"OFFICIAL BLOGS" 写成 "官方博客"、"PODCASTS" 写成 "播客"）、每条推文摘要、播客摘要全部翻译成中文。
+- 禁止出现英文段落，禁止中英双语混排（不要"一段英文、下面跟一段中文"）。
+- 技术术语保留英文：AI、LLM、agent、evals、API、fine-tuning、RAG、prompt、ARR、SaaS 等。
+- 人名、公司名、产品名、工具名保留英文原文，不音译、不翻译。
+- 所有 URL 原样保留。
+- 语气专业但有对话感，像一位懂行的朋友在跟你聊天；禁止使用破折号（em dash）。
+
+# 抓重点 + 清晰分隔（必须遵守）
+
+- 只写最有价值的内容：原创观点、产品发布、技术洞察、行业判断、金句。每个 builder 用 2-4 句中文概括。
+- 跳过：日常闲聊、无评论的转发、纯推广、"活动很棒"这类、空洞的预告。没有实质内容的 builder 直接省略，不要硬凑字数。
+- 每个 builder 之间用单独一行 "---" 分隔，让内容视觉上明显分开，不要挤在一起。
+- 每个 builder 的标题用 "### 全名 + 头衔"（头衔从 bio 提取，例如 "Box CEO Aaron Levie"），标题下直接写中文摘要，最后放该条内容的原文链接。`;
+
 function buildSystem(p, lang) {
   const parts = [];
   if (p.digest_intro) parts.push(p.digest_intro);
@@ -81,14 +97,10 @@ function buildSystem(p, lang) {
   if (p.summarize_podcast) parts.push(p.summarize_podcast);
   if (p.summarize_blogs) parts.push(p.summarize_blogs);
 
-  if (lang === 'zh' || lang === 'bilingual') {
-    if (p.translate) parts.push(p.translate);
-  }
   if (lang === 'zh') {
-    parts.push(
-      'FINAL OUTPUT LANGUAGE: Translate the entire digest into simplified Chinese (keep technical terms and proper nouns in English, per the translation instructions above).'
-    );
+    parts.push(ZH_INSTRUCTIONS);
   } else if (lang === 'bilingual') {
+    if (p.translate) parts.push(p.translate);
     parts.push(
       'FINAL OUTPUT LANGUAGE: Bilingual — interleave English and Chinese paragraph by paragraph, per the translation instructions above.'
     );
