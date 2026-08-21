@@ -91,6 +91,9 @@ function markdownToPost(md) {
 
     if (/^#{1,6}\s/.test(line)) {
       const text = line.replace(/^#{1,6}\s+/, '');
+      if (/^(X\s*\/\s*TWITTER|OFFICIAL\s+BLOGS|PODCASTS)$/i.test(text)) {
+        content.push([{ tag: 'text', text: ' ' }]); // 平台标题前加空行
+      }
       content.push([{ tag: 'text', text: '【' + text + '】' }]);
       continue;
     }
