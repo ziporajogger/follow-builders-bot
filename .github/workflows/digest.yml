@@ -1,0 +1,38 @@
+name: Daily AI Builders Digest
+
+on:
+  schedule:
+    # 每天北京时间 8:00（UTC 0:00）。改时间 = 改这里（cron 是 UTC 时间）。
+    - cron: '0 0 * * *'
+  workflow_dispatch: {}   # 允许手动触发（测试用）
+
+permissions:
+  contents: read
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 1. 拉取 feed（复用 follow-builders 的 prepare-digest.js）
+        run: node scripts/prepare-digest.js > digest.json
+
+      - name: 2. 用 Claude 润色成摘要
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DIGEST_LANGUAGE: 'zh'                 # zh / en / bilingual
+          ANTHROPIC_MODEL: 'claude-sonnet-5'
+        run: node scripts/remix.js < digest.json > digest.md
+
+      - name: 3. 发到飞书
+        env:
+          FEISHU_APP_ID: ${{ secrets.FEISHU_APP_ID }}
+          FEISHU_APP_SECRET: ${{ secrets.FEISHU_APP_SECRET }}
+          FEISHU_RECEIVE_ID: ${{ secrets.FEISHU_RECEIVE_ID }}
+        run: node scripts/send-feishu.js --file digest.md

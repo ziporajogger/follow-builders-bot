@@ -1,0 +1,5 @@
+# 本地测试文件、运行时生成的文件，不上传
+test-digest.md
+digest.json
+digest.md
+node_modules/
