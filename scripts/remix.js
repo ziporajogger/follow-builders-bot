@@ -1,19 +1,22 @@
 #!/usr/bin/env node
-// Follow Builders — 润色（调 DeepSeek 大模型 API）
+// Follow Builders — 润色（调任意 OpenAI 兼容的大模型 API）
 // 从 stdin 读 prepare-digest.js 输出的 JSON，交给大模型润色成摘要，
 // 把 markdown 写到 stdout。
 //
 // 环境变量：
-//   DEEPSEEK_API_KEY   （必填）
-//   DEEPSEEK_MODEL     （默认 deepseek-chat；要推理可改 deepseek-reasoner）
-//   DEEPSEEK_BASE_URL  （默认 https://api.deepseek.com）
-//   DIGEST_LANGUAGE     zh / en / bilingual（默认 zh）
+//   LLM_API_KEY     （必填）你所用服务商的 API key
+//   LLM_BASE_URL    （可选）服务商 base URL，默认 https://api.deepseek.com
+//   LLM_MODEL       （可选）模型名，默认 deepseek-chat
+//   DIGEST_LANGUAGE  zh / en / bilingual（默认 zh）
+//
+// 只要服务商提供 OpenAI 兼容的 POST /chat/completions 接口就能用：
+//   DeepSeek、OpenAI、Kimi(Moonshot)、智谱 GLM、通义千问、SiliconFlow 等。
 
 import { readFileSync } from 'fs';
 
-const MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
+const MODEL = process.env.LLM_MODEL || 'deepseek-chat';
 const LANGUAGE = process.env.DIGEST_LANGUAGE || 'zh';
-const BASE_URL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com';
+const BASE_URL = (process.env.LLM_BASE_URL || 'https://api.deepseek.com').replace(/\/$/, '');
 
 const NO_CONTENT = {
   zh: '今天没有新的动态，明天再来看看。',
@@ -48,7 +51,7 @@ async function main() {
     method: 'POST',
     headers: {
       'content-type': 'application/json',
-      authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
+      authorization: `Bearer ${process.env.LLM_API_KEY}`,
     },
     body: JSON.stringify({
       model: MODEL,
@@ -62,7 +65,7 @@ async function main() {
 
   if (!res.ok) {
     const err = await res.text();
-    console.error('DeepSeek API 错误', res.status, err.slice(0, 2000));
+    console.error('LLM API 错误', res.status, err.slice(0, 2000));
     process.exit(1);
   }
 

@@ -23,11 +23,12 @@ jobs:
       - name: 1. 拉取 feed（复用 follow-builders 的 prepare-digest.js）
         run: node scripts/prepare-digest.js > digest.json
 
-      - name: 2. 用 DeepSeek 润色成摘要
+      - name: 2. 用大模型润色成摘要
         env:
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-          DIGEST_LANGUAGE: 'zh'                 # zh / en / bilingual
-          DEEPSEEK_MODEL: 'deepseek-chat'
+          LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
+          LLM_BASE_URL: 'https://api.deepseek.com'   # 换成你的服务商，见 README
+          LLM_MODEL: 'deepseek-chat'                 # 换成你的模型名
+          DIGEST_LANGUAGE: 'zh'                      # zh / en / bilingual
         run: node scripts/remix.js < digest.json > digest.md
 
       - name: 3. 发到飞书
